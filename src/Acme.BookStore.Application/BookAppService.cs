@@ -80,7 +80,7 @@ public class BookAppService : ApplicationService, ITransientDependency
         }
     }
 
-    [Authorize(BookStorePermissions.Books.Get)]
+    [Authorize(BookStorePermissions.Books.Default)]
     [HttpGet("api/books/{id}")]
     public async Task<BookDto> GetAsync(Guid id)
     {

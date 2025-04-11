@@ -36,7 +36,7 @@ public class AssignmentPermissionDefinitionProvider : PermissionDefinitionProvid
     }
 
     private static LocalizableString L(string name)
-    {
+    {         
         return LocalizableString.Create<BookStoreResource>(name);
-    }
+    }    
 }

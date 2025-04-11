@@ -4,6 +4,7 @@ using Acme.BookStore.Books;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.Guids;
 
 namespace Acme.BookStore;
 
@@ -11,10 +12,12 @@ public class BookStoreDataSeederContributor
     : IDataSeedContributor, ITransientDependency
 {
     private readonly IRepository<Book, Guid> _bookRepository;
+    private readonly IGuidGenerator _guidGenerator;
 
-    public BookStoreDataSeederContributor(IRepository<Book, Guid> bookRepository)
+    public BookStoreDataSeederContributor(IRepository<Book, Guid> bookRepository, IGuidGenerator guidGenerator)
     {
         _bookRepository = bookRepository;
+        _guidGenerator = guidGenerator;
     }
 
     public async Task SeedAsync(DataSeedContext context)
@@ -23,7 +26,7 @@ public class BookStoreDataSeederContributor
         {
             await _bookRepository.InsertAsync(
                 new Book(
-                    Guid.NewGuid(),
+                    _guidGenerator.Create(),
                     "1984",
                     BookType.Dystopia,
                     new DateTime(1949, 6, 8),
@@ -34,7 +37,7 @@ public class BookStoreDataSeederContributor
 
             await _bookRepository.InsertAsync(
                 new Book(
-                    Guid.NewGuid(),
+                    _guidGenerator.Create(),
                     "The Hitchhiker's Guide to the Galaxy",
                     BookType.ScienceFiction,
                     new DateTime(1995, 9, 27),

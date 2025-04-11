@@ -8,41 +8,42 @@ using Volo.Abp;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
+using static Acme.BookStore.Permissions.AssignmentPermissions;
 
 namespace Acme.BookStore.Assignments
 {
     public class StudentAssignmentAppService : ApplicationService
     {
-        private readonly IRepository<StudentAssignment, Guid> _repository;
+        private readonly IRepository<StudentAssignment, Guid> _studentAssignmentRepository;
         private readonly IGuidGenerator _guidGenerator;
 
-        public StudentAssignmentAppService(IRepository<StudentAssignment, Guid> repository, IGuidGenerator guidGenerator)
+        public StudentAssignmentAppService(IRepository<StudentAssignment, Guid> studentAssignmentRepository, IGuidGenerator guidGenerator)
         {
-            _repository = repository;
+            _studentAssignmentRepository = studentAssignmentRepository;
             _guidGenerator = guidGenerator;
         }
 
         [Authorize(AssignmentPermissions.StudentAssignments.Create)]
         [HttpPost("api/student-assignments")]
-        public async Task<StudentAssignmentDto> CreateAsync(CreateUpdateStudentAssignmentDto input)
+        public async Task<StudentAssignmentDto> CreateAsync(CreateUpdateStudentAssignmentDto studentAssignmentDto)
         {
             try
             {
-                var assignment = new StudentAssignment(
+                var studentAssignment= new StudentAssignment(
                     _guidGenerator.Create(),
-                    input.StudentId,
-                    input.AssignmentId,
-                    input.SubmissionDate
+                    studentAssignmentDto.StudentId,
+                    studentAssignmentDto.AssignmentId,
+                    studentAssignmentDto.SubmissionDate
                 );
 
-                await _repository.InsertAsync(assignment, autoSave: true);
+                await _studentAssignmentRepository.InsertAsync(studentAssignment);
 
                 return new StudentAssignmentDto
                 {
-                    Id = assignment.Id,
-                    StudentId = assignment.StudentId,
-                    AssignmentId = assignment.AssignmentId,
-                    SubmissionDate = assignment.SubmissionDate
+                    Id = studentAssignment.Id,
+                    StudentId = studentAssignment.StudentId,
+                    AssignmentId = studentAssignment.AssignmentId,
+                    SubmissionDate = studentAssignment.SubmissionDate
                 };
             }
             catch (UserFriendlyException)
@@ -62,13 +63,13 @@ namespace Acme.BookStore.Assignments
         {
             try
             {
-                var assignment = await _repository.GetAsync(id);
+                var assignment = await _studentAssignmentRepository.GetAsync(id);
                 if (assignment == null)
                 {
                     throw new UserFriendlyException("Assignment not found.");
                 }
 
-                await _repository.DeleteAsync(id);
+                await _studentAssignmentRepository.DeleteAsync(id);
             }
             catch (UserFriendlyException)
             {
@@ -81,24 +82,24 @@ namespace Acme.BookStore.Assignments
             }
         }
 
-        [Authorize(AssignmentPermissions.StudentAssignments.Get)]
+        [Authorize(AssignmentPermissions.StudentAssignments.GetList)]
         [HttpGet("api/student-assignments/{id}")]
         public async Task<StudentAssignmentDto> GetAsync(Guid id)
         {
             try
             {
-                var assignment = await _repository.GetAsync(id);
-                if (assignment == null)
+                var studentAssignment = await _studentAssignmentRepository.GetAsync(id);
+                if (studentAssignment == null)
                 {
                     throw new UserFriendlyException("Assignment not found.");
                 }
 
                 return new StudentAssignmentDto
                 {
-                    Id = assignment.Id,
-                    StudentId = assignment.StudentId,
-                    AssignmentId = assignment.AssignmentId,
-                    SubmissionDate = assignment.SubmissionDate
+                    Id = studentAssignment.Id,
+                    StudentId = studentAssignment.StudentId,
+                    AssignmentId = studentAssignment.AssignmentId,
+                    SubmissionDate = studentAssignment.SubmissionDate
                 };
             }
             catch (Exception ex)
@@ -110,28 +111,28 @@ namespace Acme.BookStore.Assignments
 
         [Authorize(AssignmentPermissions.StudentAssignments.Edit)]
         [HttpPut("api/student-assignments/{id}")]
-        public async Task<StudentAssignmentDto> UpdateAsync(Guid id, CreateUpdateStudentAssignmentDto input)
+        public async Task<StudentAssignmentDto> UpdateAsync(Guid id, CreateUpdateStudentAssignmentDto studentAssignmentDto)
         {
             try
             {
-                var assignment = await _repository.GetAsync(id);
-                if (assignment == null)
+                var studentAssignment = await _studentAssignmentRepository.GetAsync(id);
+                if (studentAssignment == null)
                 {
                     throw new UserFriendlyException("Assignment not found.");
                 }
 
-                assignment.StudentId = input.StudentId;
-                assignment.AssignmentId = input.AssignmentId;
-                assignment.SubmissionDate = input.SubmissionDate;
+                studentAssignment.StudentId = studentAssignmentDto.StudentId;
+                studentAssignment.AssignmentId = studentAssignmentDto.AssignmentId;
+                studentAssignment.SubmissionDate = studentAssignmentDto.SubmissionDate;
 
-                await _repository.UpdateAsync(assignment, autoSave: true);
+                await _studentAssignmentRepository.UpdateAsync(studentAssignment);
 
                 return new StudentAssignmentDto
                 {
-                    Id = assignment.Id,
-                    StudentId = assignment.StudentId,
-                    AssignmentId = assignment.AssignmentId,
-                    SubmissionDate = assignment.SubmissionDate
+                    Id = studentAssignment.Id,
+                    StudentId = studentAssignment.StudentId,
+                    AssignmentId = studentAssignment.AssignmentId,
+                    SubmissionDate = studentAssignment.SubmissionDate
                 };
             }
             catch (UserFriendlyException)
